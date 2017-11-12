@@ -3,6 +3,7 @@ package keepalivedcp
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"os"
 
@@ -29,6 +30,11 @@ func newKeepalivedCloudProvider(io.Reader) (cloudprovider.Interface, error) {
 	ns := os.Getenv("KEEPALIVED_NAMESPACE")
 	cm := os.Getenv("KEEPALIVED_CONFIG_MAP")
 	cidr := os.Getenv("KEEPALIVED_SERVICE_CIDR")
+	reservedStr := os.Getenv("KEEPALIVED_SERVICE_RESERVED")
+	reserved := []string{}
+	if reservedStr != "" {
+		reserved = strings.Split(reservedStr, ",")
+	}
 	fm := os.Getenv("KEEPALIVED_DEFAULT_FORWARD_METHOD")
 
 	cfg, err := rest.InClusterConfig()
@@ -43,7 +49,7 @@ func newKeepalivedCloudProvider(io.Reader) (cloudprovider.Interface, error) {
 		return nil, fmt.Errorf("error creating kubernetes client: %s", err.Error())
 	}
 
-	return &KeepalivedCloudProvider{NewKeepalivedLoadBalancer(cl, ns, cm, cidr, fm)}, nil
+	return &KeepalivedCloudProvider{NewKeepalivedLoadBalancer(cl, ns, cm, cidr, reserved, fm)}, nil
 }
 
 // LoadBalancer returns a loadbalancer interface. Also returns true if the interface is supported, false otherwise.

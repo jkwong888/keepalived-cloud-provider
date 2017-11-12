@@ -14,7 +14,7 @@ type config struct {
 	Services []serviceConfig `json:"services"`
 }
 
-func (c *config) allocateIP(cidr string) (string, error) {
+func (c *config) allocateIP(cidr string, reserved []string) (string, error) {
 	possible, err := Hosts(cidr)
 	if err != nil {
 		return "", err
@@ -26,6 +26,14 @@ Outer:
 			// if this 'ip' candidate is already in use,
 			// break the inner loop to move onto the next IP address
 			if svc.IP == ip {
+				continue Outer
+			}
+		}
+
+		for _, reservedIP := range reserved {
+			// if this ip address is marked "reserved",
+			// break the inner loop to move onto the next IP address
+			if reservedIP == ip {
 				continue Outer
 			}
 		}

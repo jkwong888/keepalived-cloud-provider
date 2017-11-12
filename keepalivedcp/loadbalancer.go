@@ -20,13 +20,14 @@ type KeepalivedLoadBalancer struct {
 	kubeClient      *kubernetes.Clientset
 	namespace, name string
 	serviceCidr     string
+	serviceReserved []string
 	forwardMethod   string
 }
 
 var _ cloudprovider.LoadBalancer = &KeepalivedLoadBalancer{}
 
-func NewKeepalivedLoadBalancer(kubeClient *kubernetes.Clientset, ns, name, serviceCidr string, forwardMethod string) cloudprovider.LoadBalancer {
-	return &KeepalivedLoadBalancer{kubeClient, ns, name, serviceCidr, forwardMethod}
+func NewKeepalivedLoadBalancer(kubeClient *kubernetes.Clientset, ns, name, serviceCidr string, serviceReserved []string, forwardMethod string) cloudprovider.LoadBalancer {
+	return &KeepalivedLoadBalancer{kubeClient, ns, name, serviceCidr, serviceReserved, forwardMethod}
 }
 
 func (k *KeepalivedLoadBalancer) GetLoadBalancer(clusterName string, service *v1.Service) (status *v1.LoadBalancerStatus, exists bool, err error) {
@@ -158,7 +159,7 @@ func (k *KeepalivedLoadBalancer) syncLoadBalancer(service *v1.Service) (*v1.Load
 		}
 		ip = lbip
 	} else if reallocateIP {
-		ip, err = cfg.allocateIP(k.serviceCidr)
+		ip, err = cfg.allocateIP(k.serviceCidr, k.serviceReserved)
 		if err != nil {
 			return nil, err
 		}

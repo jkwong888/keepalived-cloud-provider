@@ -7,6 +7,7 @@ func TestAllocateIP(t *testing.T) {
 		name       string
 		config     config
 		cidr       string
+		reserved   []string
 		expectedIP string
 		err        bool
 	}
@@ -18,6 +19,7 @@ func TestAllocateIP(t *testing.T) {
 				Services: []serviceConfig{},
 			},
 			cidr:       "10.0.0.0/8",
+			reserved:   []string{},
 			expectedIP: "10.0.0.1",
 		},
 		{
@@ -31,14 +33,38 @@ func TestAllocateIP(t *testing.T) {
 				},
 			},
 			cidr:       "10.0.0.0/8",
+			reserved:   []string{},
 			expectedIP: "10.0.0.2",
+		},
+		{
+			name: "allocate ip address in pool with reserved ip address",
+			config: config{
+				Services: []serviceConfig{},
+			},
+			cidr:       "10.0.0.0/8",
+			reserved:   []string{"10.0.0.1"},
+			expectedIP: "10.0.0.2",
+		},
+		{
+			name: "allocate ip address in pool with reserved, with one address",
+			config: config{
+				Services: []serviceConfig{
+					{
+						UID: "a",
+						IP:  "10.0.0.2",
+					},
+				},
+			},
+			cidr:       "10.0.0.0/8",
+			reserved:   []string{"10.0.0.1"},
+			expectedIP: "10.0.0.3",
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(test testDef) func(*testing.T) {
 			return func(t *testing.T) {
-				ip, err := test.config.allocateIP(test.cidr)
+				ip, err := test.config.allocateIP(test.cidr, test.reserved)
 
 				if err != nil {
 					if test.err {

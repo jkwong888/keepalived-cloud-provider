@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  keepalived-service-cidr: {{ .Values.cloudProvider.service.cidr }}
+  keepalived-reserved-ip: {{ .Values.cloudProvider.service.reserved }}
+  
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-keepalived-cp-config

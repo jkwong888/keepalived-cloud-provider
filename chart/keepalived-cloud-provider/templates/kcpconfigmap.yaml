@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  keepalived-namespace: {{ .Release.Namespace }}
+  keepalived-configmap: {{ .Release.Name }}-keepalived-vip-configmap
+  keepalived-service-cidr: {{ .Values.service.cidr }}
+  keepalived-reserved-ip: {{ .Values.service.reserved }}
+  
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-keepalived-cp-config
